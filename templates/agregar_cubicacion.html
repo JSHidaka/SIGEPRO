@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Cubicación</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function loadTalleres(proyectoId) {
+            fetch(`/talleres_por_proyecto/${proyectoId}`)
+                .then(response => response.json())
+                .then(talleres => {
+                    const talleresDiv = document.getElementById('talleres-container');
+                    talleresDiv.innerHTML = '';
+                    
+                    const form = document.createElement('form');
+                    form.action = "{{ url_for('agregar_cubicacion') }}";
+                    form.method = "post";
+
+                    let talleresInputs = '';
+
+                    talleres.forEach(taller => {
+                        talleresInputs += `
+                            <input type="hidden" name="id_taller" value="${taller.ID_Talleres}">
+                            <h3>Item: ${taller.Item} - Lote: ${taller.Lote}</h3>
+                            <label for="aceras_${taller.ID_Talleres}">Aceras:</label>
+                            <input type="number" step="0.01" id="aceras_${taller.ID_Talleres}" name="aceras_${taller.ID_Talleres}" required><br>
+                            <label for="contenes_${taller.ID_Talleres}">Contenes:</label>
+                            <input type="number" step="0.01" id="contenes_${taller.ID_Talleres}" name="contenes_${taller.ID_Talleres}" required><br>
+                            <label for="monto_bruto_${taller.ID_Talleres}">Monto Bruto:</label>
+                            <input type="number" step="0.01" id="monto_bruto_${taller.ID_Talleres}" name="monto_bruto_${taller.ID_Talleres}" required><br>
+                        `;
+                    });
+
+                    form.innerHTML = `
+                        <input type="hidden" name="id_proyecto" value="${proyectoId}">
+                        <label for="fecha_cubicacion">Fecha de Cubicación:</label>
+                        <input type="date" id="fecha_cubicacion" name="fecha_cubicacion" required><br>
+                        <label for="fecha_firma">Fecha de Firma:</label>
+                        <input type="date" id="fecha_firma" name="fecha_firma" required><br>
+                        ${talleresInputs}
+                        <button type="submit">Agregar Cubicación</button>
+                    `;
+
+                    talleresDiv.appendChild(form);
+                });
+        }
+    </script>
+</head>
+<body>
+    <h1>Agregar Cubicación</h1>
+    <label for="proyecto-select">Proyecto:</label>
+    <select id="proyecto-select" onchange="loadTalleres(this.value)">
+        <option value="">Seleccione un proyecto</option>
+        {% for proyecto in proyectos %}
+            <option value="{{ proyecto.ID_Proyecto }}">{{ proyecto.Contrato }}</option>
+        {% endfor %}
+    </select>
+
+    <div id="talleres-container">
+        <!-- Los talleres correspondientes se mostrarán aquí -->
+    </div>
+</body>
+</html>

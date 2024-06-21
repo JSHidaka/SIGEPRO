@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subir Documentos</title>
+</head>
+<body>
+    <h1>Subir Documentos</h1>
+    <form action="{{ url_for('subir_documentos') }}" method="post" enctype="multipart/form-data">
+        <label for="contrato">Seleccione un Proyecto:</label>
+        <select name="contrato" id="contrato" onchange="loadDocumentos()">
+            <option value="">Seleccione un proyecto</option>
+            {% for proyecto in proyectos %}
+                <option value="{{ proyecto['Contrato'] }}">{{ proyecto['Oferente'] }} - {{ proyecto['Contrato'] }}</option>
+            {% endfor %}
+        </select>
+        <hr>
+        <div id="documentos">
+            <p>Seleccione un proyecto para ver los documentos asociados.</p>
+        </div>
+        <hr>
+        <div>
+            <label for="AContratoBase">Adjuntar Contrato Base:</label>
+            <input type="file" name="AContratoBase" id="AContratoBase"><br>
+            <label for="ACertBase">Adjuntar Certificado Base:</label>
+            <input type="file" name="ACertBase" id="ACertBase"><br>
+            <label for="APresBase">Adjuntar Presupuesto Base:</label>
+            <input type="file" name="APresBase" id="APresBase"><br>
+            <label for="AContratoAdenda">Adjuntar Contrato Adenda:</label>
+            <input type="file" name="AContratoAdenda" id="AContratoAdenda"><br>
+            <label for="ACertAdenda">Adjuntar Certificado Adenda:</label>
+            <input type="file" name="ACertAdenda" id="ACertAdenda"><br>
+            <label for="APresAdenda">Adjuntar Presupuesto Adenda:</label>
+            <input type="file" name="APresAdenda" id="APresAdenda"><br>
+        </div>
+        <button type="submit">Subir Documentos</button>
+    </form>
+
+    <script>
+        function loadDocumentos() {
+            const contrato = document.getElementById('contrato').value;
+            if (!contrato) {
+                document.getElementById('documentos').innerHTML = '<p>Seleccione un proyecto para ver los documentos asociados.</p>';
+                return;
+            }
+
+            fetch(`/documentos_por_contrato/${contrato}`)
+                .then(response => response.json())
+                .then(data => {
+                    const documentosDiv = document.getElementById('documentos');
+                    documentosDiv.innerHTML = '';
+                    if (Object.keys(data).length === 0) {
+                        documentosDiv.innerHTML = '<p>No hay documentos asociados a este proyecto.</p>';
+                    } else {
+                        const documentos = ['AContratoBase', 'ACertBase', 'APresBase', 'AContratoAdenda', 'ACertAdenda', 'APresAdenda'];
+                        documentos.forEach(doc => {
+                            if (data[doc]) {
+                                documentosDiv.innerHTML += `<p><a href="/download/${contrato}/${data[doc]}">${doc}</a></p>`;
+                            } else {
+                                documentosDiv.innerHTML += `<p>${doc}: No disponible</p>`;
+                            }
+                        });
+                    }
+                });
+        }
+    </script>
+</body>
+</html>

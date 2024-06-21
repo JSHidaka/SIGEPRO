@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ficha del Taller</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .center {
+            text-align: center;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1, .header h2, .header h3 {
+            margin: 0;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>MINISTERIO OBRAS PUBLICAS & COMUNICACIONES</h1>
+            <h2>DIRECCION GENERAL DE GERENCIA DE PROYECTOS</h2>
+            <h3>CONSTRUCCION Y REABILITACION DE ACERAS, CONTENES, BADENES E IMBORNALES</h3>
+        </div>
+        <table>
+            <tr>
+                <td colspan="3" class="center">
+                    <p>{{ proyecto['Oferente'] }} – Lote: {{ taller['Lote'] }} Item: {{ taller['Item'] }}</p>
+                    <p>MOPC-CCC-LPN-2021-0036</p>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>PROVINCIA:</strong> {{ taller['Provincia'] }}</td>
+                <td colspan="2"><strong>CONTRATO:</strong> {{ proyecto['Contrato'] }}</td>
+            </tr>
+            <tr>
+                <td><strong><b>ESTATUS: </b>{{ estatus }}</strong></td>
+                <td colspan="2"><strong>ADENDA:</strong> N/A</td>
+            </tr>
+            <tr>
+                <td rowspan="11">
+                    <div>
+                        <table>
+                            <tr>
+                                <td><img src="{{ imagenes[0] }}" alt="Image 1" style="height: 270px; width: 203px;"></td>
+                                <td><img src="{{ imagenes[1] }}" alt="Image 2" style="height: 270px; width: 203px;"></td>
+                            </tr>
+                            <tr>
+                                <td><img src="{{ imagenes[2] }}" alt="Image 3" style="height: 270px; width: 203px;"></td>
+                                <td><img src="{{ imagenes[3] }}" alt="Image 4" style="height: 270px; width: 203px;"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+                <td><strong>DIRECTOR GPRO:</strong></td>
+                <td>IEM. FELIX MIGUEL MARTINEZ</td>
+            </tr>
+            <tr>
+                <td><strong>COORDINADOR REGIONAL:</strong></td>
+                <td>{{ taller['Coordinador'] }}</td>
+            </tr>
+            <tr>
+                <td><strong>SUPERVISOR:</strong></td>
+                <td>{{ taller['Supervisor'] }}</td>
+            </tr>
+            <tr>
+                <td><strong>% EJECUCION:</strong></td>
+                <td>{{ porciento_eje }}%</td>
+            </tr>
+            <tr>
+                <td><strong>MONTO ITEM:</strong></td>
+                <td>{{ taller['Montoitem'] | number_format }}</td>
+            </tr>
+            <tr>
+                <td><strong>MONTO CUB. ITEM:</strong></td>
+                <td>{{ total_cubicacion | number_format }}</td>
+            </tr>
+            <tr>
+                <td><strong>TOTAL ACERAS:</strong></td>
+                <td>{{ total_aceras | number_format_no_dollar }}</td>
+            </tr>
+            <tr>
+                <td><strong>TOTAL CONTENES:</strong></td>
+                <td>{{ total_contenes | number_format_no_dollar }}</td>
+            </tr>
+            <tr>
+                <td colspan="2" class="center"><strong>ESTATUS EJECUCION</strong></td>
+            </tr>
+            <tr>
+                <td colspan="2" class="center"><p>Sectores: {{taller['Sectores']}}</p></td>
+            </tr>
+            <tr>
+                <td colspan="2" class="center"><strong>OBSERVACIONES: {{ observaciones }}</strong></td>
+        </table>
+    </div>
+</body>
+</html>
