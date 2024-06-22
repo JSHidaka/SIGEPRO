@@ -7,7 +7,7 @@
     <h1>Crear Reporte</h1>
     <form action="{{ url_for('crear_reporte') }}" method="post" enctype="multipart/form-data">
         <div class="input-field">
-            <select id="zona" name="zona" onchange="loadProyectos()" class="browser-default" required>
+            <select id="zona" name="zona" onchange="loadProyectos()" class="browser-default">
                 <option value="" disabled selected>Seleccione una zona</option>
                 {% for zona in zonas %}
                     <option value="{{ zona['Zonagpro'] }}">{{ zona['Zonagpro'] }}</option>
@@ -15,23 +15,26 @@
             </select>
         </div>
         <div class="input-field">
-            <select id="contrato" name="contrato" onchange="loadTalleres()" class="browser-default" required>
+            <select id="contrato" name="contrato" onchange="loadTalleres()" class="browser-default">
                 <option value="" disabled selected>Seleccione un proyecto</option>
             </select>
         </div>
         <div class="input-field">
-            <select id="id_taller" name="id_taller" class="browser-default" required>
+            <select id="id_taller" name="id_taller" onchange="loadUltimoReporte()" class="browser-default">
                 <option value="" disabled selected>Seleccione un taller</option>
             </select>
         </div>
+        <div id="ultimo-reporte-info"></div>
         <div class="input-field">
             <input type="date" name="fecha_reporte" id="fecha_reporte" required>
+            <label for="fecha_reporte">Fecha del Reporte</label>
         </div>
         <div class="input-field">
-            <textarea id="descripcion" name="descripcion" class="materialize-textarea" placeholder="Descripción" required></textarea>
+            <textarea id="descripcion" name="descripcion" class="materialize-textarea" required></textarea>
+            <label for="descripcion">Descripción</label>
         </div>
         <div class="input-field">
-            <select id="estatus" name="estatus" class="browser-default" required>
+            <select id="estatus" name="estatus" required class="browser-default">
                 <option value="" disabled selected>Seleccione un estatus</option>
                 <option value="No Iniciada">No Iniciada</option>
                 <option value="Activa">Activa</option>
@@ -42,7 +45,8 @@
             </select>
         </div>
         <div class="input-field">
-            <input type="number" name="porciento_eje" id="porciento_eje" step="0.01" placeholder="Porciento de Ejecución" required>
+            <input type="number" name="porciento_eje" id="porciento_eje" step="0.01" required>
+            <label for="porciento_eje">Porciento de Ejecución</label>
         </div>
         <div class="file-field input-field">
             <div class="btn">
@@ -108,6 +112,20 @@
                 data.forEach(taller => {
                     tallerSelect.innerHTML += `<option value="${taller.ID_Talleres}">${taller.Item} - ${taller.Lote}</option>`;
                 });
+            });
+    }
+
+    function loadUltimoReporte() {
+        const tallerId = document.getElementById('id_taller').value;
+        fetch(`/ultimo_reporte/${tallerId}`)
+            .then(response => response.json())
+            .then(data => {
+                const ultimoReporteInfo = document.getElementById('ultimo-reporte-info');
+                if (data && data.Fecha_Reporte) {
+                    ultimoReporteInfo.innerHTML = `<p>Último Reporte: ${data.Fecha_Reporte}</p>`;
+                } else {
+                    ultimoReporteInfo.innerHTML = `<p>No tiene reportes a la fecha.</p>`;
+                }
             });
     }
 </script>
