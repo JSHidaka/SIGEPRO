@@ -159,14 +159,12 @@ def crear_reporte():
             if image:
                 image.save(os.path.join(reporte_path, f'{i}.jpg'))
 
-        # Quedarse en la misma página después de crear el reporte
         return redirect(url_for('crear_reporte'))
-
+    
     conn = get_db_connection()
-    proyectos = conn.execute('SELECT * FROM Proyectos').fetchall()
+    zonas = conn.execute('SELECT DISTINCT Zonagpro FROM Talleres').fetchall()
     conn.close()
-    return render_template('crear_reporte.html', proyectos=proyectos)
-
+    return render_template('crear_reporte.html', zonas=zonas)
 
 @app.route('/cubicaciones')
 def cubicaciones():
@@ -410,9 +408,9 @@ def exportar_excel():
     proyectos_query = '''
     SELECT p.ID_Proyecto, p.Contrato as Proyecto_Contrato, p.Oferente,
            t.ID_Talleres, t.Contrato as Taller_Contrato, t.Zonagpro, t.Lote, t.Item, t.Provincia, t.Municipio, t.Sectores, 
-           t.Ejecucion, t.Porcientoeje as Taller_PorcientoEje, t.Comentarios, t.Montoitem, t.Longitud, t.Latitud, t.Coordinador, t.Supervisor,
-           r.ID_Reporte, r.ID_Talleres as Reporte_Talleres, r.ID_Proyecto as Reporte_Proyecto, r.Fecha_Reporte, r.Descripción, r.Imagen_1, r.Imagen_2, 
-           r.Imagen_3, r.Imagen_4, r.Estatus as Reporte_Estatus, r.PorcientoEje as Reporte_PorcientoEje,
+           t.Montoitem, t.Longitud, t.Latitud, t.Coordinador, t.Supervisor,
+           r.ID_Reporte, r.ID_Talleres as Reporte_Talleres, r.ID_Proyecto as Reporte_Proyecto, r.Fecha_Reporte, r.Descripción,
+           r.Estatus as Reporte_Estatus, r.PorcientoEje as Reporte_PorcientoEje,
            c.total_monto_bruto, c.total_aceras, c.total_contenes
     FROM Proyectos p
     LEFT JOIN Talleres t ON p.Contrato = t.Contrato
@@ -442,10 +440,10 @@ def exportar_excel():
     column_names = [
         'ID Proyecto', 'Contrato Proyecto', 'Oferente',
         'ID Taller', 'Contrato Taller', 'Zona Gpro', 'Lote', 'Item', 'Provincia', 'Municipio', 'Sectores', 
-        'Ejecución', 'Porciento Ejecución Taller', 'Comentarios', 'Monto Item', 'Longitud', 'Latitud', 
+        'Monto Item', 'Longitud', 'Latitud', 
         'Coordinador', 'Supervisor',
-        'ID Reporte', 'ID Taller Reporte', 'ID Proyecto Reporte', 'Fecha Reporte', 'Descripción', 'Imagen 1', 'Imagen 2', 
-        'Imagen 3', 'Imagen 4', 'Estatus Reporte', 'Porciento Ejecución Reporte',
+        'ID Reporte', 'ID Taller Reporte', 'ID Proyecto Reporte', 'Fecha Reporte', 'Descripción', 
+        'Estatus Reporte', 'Porciento Ejecución Reporte',
         'Total Monto Bruto', 'Total Aceras', 'Total Contenes'
     ]
     
@@ -457,6 +455,19 @@ def exportar_excel():
     df.to_excel(output_file, index=False)
     
     return send_from_directory(directory='.', path=output_file, as_attachment=True)
+
+@app.route('/proyectos_por_zona/<zona>')
+def proyectos_por_zona(zona):
+    conn = get_db_connection()
+    proyectos = conn.execute('''
+        SELECT DISTINCT p.* 
+        FROM Proyectos p
+        JOIN Talleres t ON p.Contrato = t.Contrato
+        WHERE t.Zonagpro = ?
+    ''', (zona,)).fetchall()
+    conn.close()
+    return jsonify([dict(proyecto) for proyecto in proyectos])
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)

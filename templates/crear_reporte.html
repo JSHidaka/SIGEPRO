@@ -7,32 +7,32 @@
     <h1>Crear Reporte</h1>
     <form action="{{ url_for('crear_reporte') }}" method="post" enctype="multipart/form-data">
         <div class="input-field">
-            <label for="contrato">Seleccione un Proyecto:</label>
-            <select name="contrato" id="contrato" onchange="loadTalleres()">
-                <option value="" disabled selected>Seleccione un proyecto</option>
-                {% for proyecto in proyectos %}
-                    <option value="{{ proyecto['Contrato'] }}">{{ proyecto['Oferente'] }} - {{ proyecto['Contrato'] }}</option>
+            <select id="zona" name="zona" onchange="loadProyectos()" class="browser-default" required>
+                <option value="" disabled selected>Seleccione una zona</option>
+                {% for zona in zonas %}
+                    <option value="{{ zona['Zonagpro'] }}">{{ zona['Zonagpro'] }}</option>
                 {% endfor %}
             </select>
         </div>
         <div class="input-field">
-            <label for="id_taller">Seleccione un Taller:</label>
-            <select name="id_taller" id="id_taller">
+            <select id="contrato" name="contrato" onchange="loadTalleres()" class="browser-default" required>
+                <option value="" disabled selected>Seleccione un proyecto</option>
+            </select>
+        </div>
+        <div class="input-field">
+            <select id="id_taller" name="id_taller" class="browser-default" required>
                 <option value="" disabled selected>Seleccione un taller</option>
             </select>
         </div>
         <div class="input-field">
-            <label for="fecha_reporte">Fecha del Reporte:</label>
             <input type="date" name="fecha_reporte" id="fecha_reporte" required>
         </div>
         <div class="input-field">
-            <label for="descripcion">Descripción:</label>
-            <textarea name="descripcion" id="descripcion" class="materialize-textarea" required></textarea>
+            <textarea id="descripcion" name="descripcion" class="materialize-textarea" placeholder="Descripción" required></textarea>
         </div>
         <div class="input-field">
-            <label for="estatus">Estatus:</label>
-            <select name="estatus" id="estatus" required>
-                <option value="" disabled selected>Seleccione el estatus</option>
+            <select id="estatus" name="estatus" class="browser-default" required>
+                <option value="" disabled selected>Seleccione un estatus</option>
                 <option value="No Iniciada">No Iniciada</option>
                 <option value="Activa">Activa</option>
                 <option value="Detenida - Falta de pago">Detenida - Falta de pago</option>
@@ -42,48 +42,72 @@
             </select>
         </div>
         <div class="input-field">
-            <label for="porciento_eje">Porciento de Ejecución:</label>
-            <input type="number" name="porciento_eje" id="porciento_eje" required>
+            <input type="number" name="porciento_eje" id="porciento_eje" step="0.01" placeholder="Porciento de Ejecución" required>
         </div>
-        <div>
-            <label for="imagen_1">Adjuntar Imagen 1:</label>
-            <input type="file" name="imagen_1" id="imagen_1" required><br>
-            <label for="imagen_2">Adjuntar Imagen 2:</label>
-            <input type="file" name="imagen_2" id="imagen_2" required><br>
-            <label for="imagen_3">Adjuntar Imagen 3:</label>
-            <input type="file" name="imagen_3" id="imagen_3" required><br>
-            <label for="imagen_4">Adjuntar Imagen 4:</label>
-            <input type="file" name="imagen_4" id="imagen_4" required><br>
+        <div class="file-field input-field">
+            <div class="btn">
+                <span>Imagen 1</span>
+                <input type="file" name="imagen_1" id="imagen_1" required>
+            </div>
+            <div class="file-path-wrapper">
+                <input class="file-path validate" type="text">
+            </div>
+        </div>
+        <div class="file-field input-field">
+            <div class="btn">
+                <span>Imagen 2</span>
+                <input type="file" name="imagen_2" id="imagen_2" required>
+            </div>
+            <div class="file-path-wrapper">
+                <input class="file-path validate" type="text">
+            </div>
+        </div>
+        <div class="file-field input-field">
+            <div class="btn">
+                <span>Imagen 3</span>
+                <input type="file" name="imagen_3" id="imagen_3" required>
+            </div>
+            <div class="file-path-wrapper">
+                <input class="file-path validate" type="text">
+            </div>
+        </div>
+        <div class="file-field input-field">
+            <div class="btn">
+                <span>Imagen 4</span>
+                <input type="file" name="imagen_4" id="imagen_4" required>
+            </div>
+            <div class="file-path-wrapper">
+                <input class="file-path validate" type="text">
+            </div>
         </div>
         <button type="submit" class="btn">Crear Reporte</button>
     </form>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var elems = document.querySelectorAll('select');
-        var instances = M.FormSelect.init(elems);
-    });
+    function loadProyectos() {
+        const zona = document.getElementById('zona').value;
+        fetch(`/proyectos_por_zona/${zona}`)
+            .then(response => response.json())
+            .then(data => {
+                const contratoSelect = document.getElementById('contrato');
+                contratoSelect.innerHTML = '<option value="" disabled selected>Seleccione un proyecto</option>';
+                data.forEach(proyecto => {
+                    contratoSelect.innerHTML += `<option value="${proyecto.Contrato}">${proyecto.Oferente} - ${proyecto.Contrato}</option>`;
+                });
+            });
+    }
 
     function loadTalleres() {
         const contrato = document.getElementById('contrato').value;
-        if (!contrato) {
-            document.getElementById('id_taller').innerHTML = '<option value="" disabled selected>Seleccione un taller</option>';
-            return;
-        }
-
         fetch(`/talleres_por_contrato/${contrato}`)
             .then(response => response.json())
             .then(data => {
-                const talleresSelect = document.getElementById('id_taller');
-                talleresSelect.innerHTML = '<option value="" disabled selected>Seleccione un taller</option>';
+                const tallerSelect = document.getElementById('id_taller');
+                tallerSelect.innerHTML = '<option value="" disabled selected>Seleccione un taller</option>';
                 data.forEach(taller => {
-                    const option = document.createElement('option');
-                    option.value = taller.ID_Talleres;
-                    option.textContent = `Item: ${taller.Item} - Lote: ${taller.Lote}`;
-                    talleresSelect.appendChild(option);
+                    tallerSelect.innerHTML += `<option value="${taller.ID_Talleres}">${taller.Item} - ${taller.Lote}</option>`;
                 });
-                M.FormSelect.init(talleresSelect);
             });
     }
 </script>
