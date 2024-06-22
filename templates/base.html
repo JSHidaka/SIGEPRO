@@ -9,22 +9,35 @@
 </head>
 <body>
     <nav>
-        <div class="nav-wrapper">
+        <div class="nav-wrapper blue darken-3">
             <a href="#" class="brand-logo">SIGEPRO</a>
-            <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            <ul class="right hide-on-med-and-down">
                 <li><a href="{{ url_for('inicio') }}">Inicio</a></li>
-                <li><a href="{{ url_for('index') }}">Proyectos</a></li>
                 <li><a href="{{ url_for('subir_documentos') }}">Documentos del Proyecto</a></li>
-                <li><a href="{{ url_for('seleccionar_taller') }}">Ficha de Supervision</a></li>
+                <li><a href="{{ url_for('index') }}">Consulta de Proyectos</a></li>
+                <li><a href="{{ url_for('seleccionar_taller') }}">Ficha de Supervisión</a></li>
             </ul>
         </div>
     </nav>
 
+    <ul class="sidenav" id="mobile-demo">
+        <li><a href="{{ url_for('inicio') }}">Inicio</a></li>
+        <li><a href="{{ url_for('subir_documentos') }}">Documentos del Proyecto</a></li>
+        <li><a href="{{ url_for('index') }}">Consulta de Proyectos</a></li>
+        <li><a href="{{ url_for('seleccionar_taller') }}">Ficha de Supervisión</a></li>
+    </ul>
+
     <div class="container">
-        {% block content %}
-        {% endblock %}
+        {% block content %}{% endblock %}
     </div>
 
     <script src="{{ url_for('static', filename='materialize.min.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var elems = document.querySelectorAll('.sidenav');
+            var instances = M.Sidenav.init(elems);
+        });
+    </script>
 </body>
 </html>
