@@ -3,6 +3,7 @@ from werkzeug.utils import secure_filename
 from flask_weasyprint import HTML, render_pdf, CSS
 import sqlite3
 import os
+import pandas as pd
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -398,6 +399,62 @@ def subir_documentos():
 @app.route('/download/<contrato>/<filename>')
 def download_file(contrato, filename):
     return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'], contrato, 'docs'), filename)
+
+@app.route('/exportar_excel')
+def exportar_excel():
+    conn = get_db_connection()
+    
+    # Obtener información de proyectos
+    proyectos_query = '''
+    SELECT p.ID_Proyecto, p.Contrato as Proyecto_Contrato, p.Oferente,
+           t.ID_Talleres, t.Contrato as Taller_Contrato, t.Zonagpro, t.Lote, t.Item, t.Provincia, t.Municipio, t.Sectores, 
+           t.Ejecucion, t.Porcientoeje as Taller_PorcientoEje, t.Comentarios, t.Montoitem, t.Longitud, t.Latitud, t.Coordinador, t.Supervisor,
+           r.ID_Reporte, r.ID_Talleres as Reporte_Talleres, r.ID_Proyecto as Reporte_Proyecto, r.Fecha_Reporte, r.Descripción, r.Imagen_1, r.Imagen_2, 
+           r.Imagen_3, r.Imagen_4, r.Estatus as Reporte_Estatus, r.PorcientoEje as Reporte_PorcientoEje,
+           c.total_monto_bruto, c.total_aceras, c.total_contenes
+    FROM Proyectos p
+    LEFT JOIN Talleres t ON p.Contrato = t.Contrato
+    LEFT JOIN (
+        SELECT r1.*
+        FROM Reportes r1
+        JOIN (
+            SELECT ID_Talleres, MAX(Fecha_Reporte) as max_fecha
+            FROM Reportes
+            GROUP BY ID_Talleres
+        ) r2 ON r1.ID_Talleres = r2.ID_Talleres AND r1.Fecha_Reporte = r2.max_fecha
+    ) r ON t.ID_Talleres = r.ID_Talleres
+    LEFT JOIN (
+        SELECT ID_Talleres, SUM(MontoBruto) as total_monto_bruto, SUM(Aceras) as total_aceras, SUM(Contenes) as total_contenes
+        FROM Cubicaciones
+        GROUP BY ID_Talleres
+    ) c ON t.ID_Talleres = c.ID_Talleres
+    '''
+    
+    proyectos = conn.execute(proyectos_query).fetchall()
+    conn.close()
+    
+    # Convertir los datos a un DataFrame de pandas
+    df = pd.DataFrame(proyectos)
+    
+    # Definir los nombres de las columnas
+    column_names = [
+        'ID Proyecto', 'Contrato Proyecto', 'Oferente',
+        'ID Taller', 'Contrato Taller', 'Zona Gpro', 'Lote', 'Item', 'Provincia', 'Municipio', 'Sectores', 
+        'Ejecución', 'Porciento Ejecución Taller', 'Comentarios', 'Monto Item', 'Longitud', 'Latitud', 
+        'Coordinador', 'Supervisor',
+        'ID Reporte', 'ID Taller Reporte', 'ID Proyecto Reporte', 'Fecha Reporte', 'Descripción', 'Imagen 1', 'Imagen 2', 
+        'Imagen 3', 'Imagen 4', 'Estatus Reporte', 'Porciento Ejecución Reporte',
+        'Total Monto Bruto', 'Total Aceras', 'Total Contenes'
+    ]
+    
+    # Asignar los nombres a las columnas del DataFrame
+    df.columns = column_names
+    
+    # Crear un archivo Excel con los datos
+    output_file = 'proyectos_talleres_reportes_cubicaciones.xlsx'
+    df.to_excel(output_file, index=False)
+    
+    return send_from_directory(directory='.', path=output_file, as_attachment=True)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)

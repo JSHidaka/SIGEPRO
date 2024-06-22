@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyectos - SIGEPRO</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='materialize.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .thumbnail {
+            width: 100px;
+            height: auto;
+            cursor: pointer;
+        }
+        #lightbox {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+        }
+        #lightbox-img {
+            max-width: 90%;
+            max-height: 90%;
+        }
+        hr {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-wrapper blue darken-3">
+            <a href="#" class="brand-logo">SIGEPRO</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="{{ url_for('inicio') }}">Inicio</a></li>
+                <li><a href="{{ url_for('subir_documentos') }}">Documentos del Proyecto</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Seleccione un Proyecto</h1>
+        <div class="input-field">
+            <select id="project-select" onchange="onProjectChange()">
+                <option value="" disabled selected>Seleccione un proyecto</option>
+                {% for proyecto in proyectos %}
+                    <option value="{{ proyecto['Contrato'] }}" data-oferente="{{ proyecto['Oferente'] }}">{{ proyecto['Oferente'] }} - {{ proyecto['Contrato'] }}</option>
+                {% endfor %}
+            </select>
+            <label>Proyectos</label>
+        </div>
+
+        <h2 id="project-header"></h2>
+        <h3 id="project-monto"></h3>
+        <hr>
+        <h2>Talleres del Proyecto</h2>
+        <div id="talleres">
+            <p>Seleccione un proyecto para ver los talleres asociados.</p>
+        </div>
+        <hr>
+        <h2>Cubicaciones del Proyecto</h2>
+        <div id="cubicaciones">
+            <p>Seleccione un proyecto para ver las cubicaciones asociadas.</p>
+        </div>
+        <a href="{{ url_for('agregar_cubicacion') }}" class="btn">Crear Cubicación</a>
+        <div id="totales">
+            <!-- Aquí se mostrarán los totales de las cubicaciones -->
+        </div>
+        <hr>
+        <h2>Reportes del Taller</h2>
+        <div id="reportes">
+            <p>Seleccione un taller para ver los reportes asociados.</p>
+        </div>
+
+        <h2>Crear un Nuevo Reporte</h2>
+        <a href="{{ url_for('crear_reporte') }}" class="btn">Crear Reporte</a>
+
+        <div id="lightbox" onclick="closeLightbox()">
+            <img id="lightbox-img" src="" alt="Lightbox Image">
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='materialize.min.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var elems = document.querySelectorAll('select');
+            var instances = M.FormSelect.init(elems);
+        });
+
+        function showLightbox(src) {
+            var lightbox = document.getElementById('lightbox');
+            var lightboxImg = document.getElementById('lightbox-img');
+            lightboxImg.src = src;
+            lightbox.style.display = 'flex';
+        }
+
+        function closeLightbox() {
+            var lightbox = document.getElementById('lightbox');
+            lightbox.style.display = 'none';
+        }
+
+        function formatNumber(num) {
+            return num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+
+        function getTalleres(contrato) {
+            fetch(`/talleres/${contrato}`)
+                .then(response => response.json())
+                .then(data => {
+                    const talleresDiv = document.getElementById('talleres');
+                    const cubicacionesDiv = document.getElementById('cubicaciones');
+                    const totalesDiv = document.getElementById('totales');
+                    talleresDiv.innerHTML = '';
+                    cubicacionesDiv.innerHTML = '';
+                    totalesDiv.innerHTML = '';
+                    const montoTotal = data.monto_total || 0;
+                    document.getElementById('project-monto').textContent = `Monto de Contrato: $${formatNumber(montoTotal)}`;
+                    
+                    const talleres = data.talleres;
+                    if (talleres.length > 0) {
+                        let table = '<table class="striped"><thead><tr><th>Lote</th><th>Item</th><th>Provincia</th><th>Municipio</th><th>Sectores</th><th>Monto Item</th><th>Acciones</th></tr></thead><tbody>';
+                        talleres.forEach(taller => {
+                            table += `<tr>
+                                <td>${taller.Lote}</td>
+                                <td>${taller.Item}</td>
+                                <td>${taller.Provincia}</td>
+                                <td>${taller.Municipio}</td>
+                                <td>${taller.Sectores || ''}</td>
+                                <td>${formatNumber(taller.Montoitem)}</td>
+                                <td>
+                                    <button class="btn" onclick="getReportes(${taller.ID_Talleres})">Ver Reportes</button>
+                                    <button class="btn" onclick="getUltimoReporte(${taller.ID_Talleres})">Ver Último Reporte</button>
+                                </td>
+                            </tr>`;
+                        });
+                        table += '</tbody></table>';
+                        talleresDiv.innerHTML = table;
+                    } else {
+                        talleresDiv.innerHTML = '<p>No hay talleres para este proyecto.</p>';
+                    }
+
+                    const cubicaciones = data.cubicaciones;
+                    if (cubicaciones.length > 0) {
+                        let table = '<table class="striped"><thead><tr><th>ID</th><th>Fecha de Cubicación</th><th>Fecha de Firma</th><th>Aceras</th><th>Contenes</th><th>Monto Bruto</th><th>Lote</th><th>Item</th></tr></thead><tbody>';
+                        cubicaciones.forEach(cubicacion => {
+                            table += `<tr>
+                                <td>${cubicacion.ID_Cubicacion}</td>
+                                <td>${cubicacion.Fecha_Cubicacion}</td>
+                                <td>${cubicacion.Fecha_Firma}</td>
+                                <td>${formatNumber(cubicacion.Aceras)}</td>
+                                <td>${formatNumber(cubicacion.Contenes)}</td>
+                                <td>${formatNumber(cubicacion.MontoBruto)}</td>
+                                <td>${cubicacion.Lote}</td>
+                                <td>${cubicacion.Item}</td>
+                            </tr>`;
+                        });
+                        table += '</tbody></table>';
+                        cubicacionesDiv.innerHTML = table;
+
+                        const totales = data.totales;
+                        if (totales) {
+                            const totalTable = `
+                                <table class="striped">
+                                    <thead>
+                                        <tr><th>Total Aceras</th><th>Total Contenes</th><th>Total Monto Bruto</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>${formatNumber(totales.total_aceras)}</td>
+                                            <td>${formatNumber(totales.total_contenes)}</td>
+                                            <td>${formatNumber(totales.total_monto_bruto)}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            `;
+                            totalesDiv.innerHTML = totalTable;
+                        }
+                    } else {
+                        cubicacionesDiv.innerHTML = '<p>No hay cubicaciones para este proyecto.</p>';
+                    }
+                });
+        }
+
+        function getReportes(tallerId) {
+            fetch(`/reportes/${tallerId}`)
+                .then(response => response.json())
+                .then(reportes => {
+                    const reportesDiv = document.getElementById('reportes');
+                    reportesDiv.innerHTML = '';
+                    if (reportes.length > 0) {
+                        reportes.forEach(reporte => {
+                            let list = `<div><h3>Reporte ID: ${reporte.ID_Reporte} - Estatus: ${reporte.Estatus}</h3><p>${reporte.Fecha_Reporte}: ${reporte.Descripción}</p><div>`;
+                            reporte.imagenes.forEach(imagen => {
+                                list += `<img src="${imagen}" class="thumbnail" onclick="showLightbox('${imagen}')">`;
+                            });
+                            list += '</div></div>';
+                            reportesDiv.innerHTML += list;
+                        });
+                    } else {
+                        reportesDiv.innerHTML = '<p>No hay reportes para este taller.</p>';
+                    }
+                });
+        }
+
+        function getUltimoReporte(tallerId) {
+            fetch(`/ultimo_reporte/${tallerId}`)
+                .then(response => response.json())
+                .then(reporte => {
+                    const reportesDiv = document.getElementById('reportes');
+                    reportesDiv.innerHTML = '';
+                    if (reporte) {
+                        let list = `<div><h3>Último Reporte ID: ${reporte.ID_Reporte} - Estatus: ${reporte.Estatus}</h3><p>${reporte.Fecha_Reporte}: ${reporte.Descripción}</p><div>`;
+                        reporte.imagenes.forEach(imagen => {
+                            list += `<img src="${imagen}" class="thumbnail" onclick="showLightbox('${imagen}')">`;
+                        });
+                        list += '</div></div>';
+                        reportesDiv.innerHTML = list;
+                    } else {
+                        reportesDiv.innerHTML = '<p>No hay reportes para este taller.</p>';
+                    }
+                });
+        }
+
+        function onProjectChange() {
+            const select = document.getElementById('project-select');
+            const contrato = select.value;
+            const oferente = select.options[select.selectedIndex].dataset.oferente;
+            const header = document.getElementById('project-header');
+            const monto = document.getElementById('project-monto');
+            const talleresDiv = document.getElementById('talleres');
+            const cubicacionesDiv = document.getElementById('cubicaciones');
+            const totalesDiv = document.getElementById('totales');
+            const reportesDiv = document.getElementById('reportes');
+
+            // Actualizar el encabezado
+            header.textContent = oferente + ' - ' + contrato;
+
+            // Limpiar la información de los talleres, cubicaciones, totales y reportes
+            talleresDiv.innerHTML = '';
+            cubicacionesDiv.innerHTML = '';
+            totalesDiv.innerHTML = '';
+            reportesDiv.innerHTML = '';
+            monto.textContent = '';
+
+            if (contrato) {
+                getTalleres(contrato);
+            }
+        }
+    </script>
+</body>
+</html>

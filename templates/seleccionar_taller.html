@@ -1,82 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Seleccionar Taller</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
-        }
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .header h1 {
-            margin: 0;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        label {
-            font-weight: bold;
-        }
-        select, button {
-            padding: 10px;
-            font-size: 16px;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Seleccionar Taller</h1>
-        </div>
-        <form id="form_generar" action="{{ url_for('generar_ficha') }}" method="get">
-            <label for="proyecto">Seleccionar Proyecto:</label>
-            <select id="proyecto" name="proyecto" required>
-                {% for proyecto in proyectos %}
+{% extends 'base.html' %}
+
+{% block title %}Seleccionar Taller{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Seleccionar Taller</h1>
+    <div class="input-field">
+        <select id="project-select" onchange="loadTalleres()">
+            <option value="" disabled selected>Seleccione un proyecto</option>
+            {% for proyecto in proyectos %}
                 <option value="{{ proyecto['ID_Proyecto'] }}">{{ proyecto['Oferente'] }} - {{ proyecto['Contrato'] }}</option>
-                {% endfor %}
-            </select>
-            <br>
-            <label for="taller">Seleccionar Taller:</label>
-            <select id="taller" name="taller" required>
-                <!-- Los talleres se cargarán dinámicamente con JavaScript -->
-            </select>
-            <br>
-            <button type="submit">Generar Ficha</button>
-        </form>
+            {% endfor %}
+        </select>
+        <label>Seleccione un Proyecto:</label>
     </div>
-    <script>
-        document.getElementById('proyecto').addEventListener('change', function() {
-            var proyectoId = this.value;
-            fetch('/talleres_por_proyecto_seleccion/' + proyectoId)
-                .then(response => response.json())
-                .then(data => {
-                    var tallerSelect = document.getElementById('taller');
-                    tallerSelect.innerHTML = '';
+    <hr>
+    <div id="talleres">
+        <p>Seleccione un proyecto para ver los talleres asociados.</p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var elems = document.querySelectorAll('select');
+        M.FormSelect.init(elems);
+    });
+
+    function loadTalleres() {
+        const projectId = document.getElementById('project-select').value;
+        if (!projectId) {
+            document.getElementById('talleres').innerHTML = '<p>Seleccione un proyecto para ver los talleres asociados.</p>';
+            return;
+        }
+
+        fetch(`/talleres_por_proyecto_seleccion/${projectId}`)
+            .then(response => response.json())
+            .then(data => {
+                const talleresDiv = document.getElementById('talleres');
+                talleresDiv.innerHTML = '';
+                if (data.length === 0) {
+                    talleresDiv.innerHTML = '<p>No hay talleres asociados a este proyecto.</p>';
+                } else {
+                    let table = '<table class="striped"><thead><tr><th>Zona Gpro</th><th>Lote</th><th>Item</th><th>Provincia</th><th>Municipio</th><th>Sectores</th><th>Acciones</th></tr></thead><tbody>';
                     data.forEach(taller => {
-                        var option = document.createElement('option');
-                        option.value = taller.ID_Talleres;
-                        option.text = 'Lote: ' + taller.Lote + ' Item: ' + taller.Item;
-                        tallerSelect.appendChild(option);
+                        table += `<tr>
+                            <td>${taller.Zonagpro}</td>
+                            <td>${taller.Lote}</td>
+                            <td>${taller.Item}</td>
+                            <td>${taller.Provincia}</td>
+                            <td>${taller.Municipio}</td>
+                            <td>${taller.Sectores || ''}</td>
+                            <td>
+                                <a href="/generar_ficha?taller=${taller.ID_Talleres}" target="_blank" class="btn">Generar Ficha</a>
+                                <a href="/generar_ficha_pdf?taller=${taller.ID_Talleres}" target="_blank" class="btn">Generar PDF</a>
+                            </td>
+                        </tr>`;
                     });
-                });
-        });
-    </script>
-</body>
-</html>
+                    table += '</tbody></table>';
+                    talleresDiv.innerHTML = table;
+                }
+            });
+    }
+</script>
+{% endblock %}

@@ -1,16 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Inicio</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <h1>Bienvenido al Sistema de Gestión de Proyectos de la Gerencia de Proyectos</h1>
-    <ul>
-        <li><a href="{{ url_for('index') }}">Proyectos</a></li>
-        <li><a href="{{ url_for('seleccionar_taller') }}">Generar Ficha del Taller</a></li>
-        <li><a href="{{ url_for('subir_documentos') }}">Documentos del Proyecto</a></li>
-    </ul>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Inicio - SIGEPRO{% endblock %}
+
+{% block content %}
+<h1>Bienvenido a SIGEPRO</h1>
+<p>Sistema de Gestión de Proyectos.</p>
+{% endblock %}

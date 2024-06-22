@@ -1,0 +1,90 @@
+/* Archivo: static/style.css */
+
+/* Definir los colores */
+:root {
+    --primary-color: #004990;
+    --secondary-color: #f9a825;
+    --background-color: #f4f4f4;
+    --text-color: #ffffff;
+}
+
+/* Estilo para el cuerpo del documento */
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0;
+}
+
+/* Estilo para el contenedor principal */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Estilo para la barra de navegación */
+.nav-wrapper {
+    background-color: var(--primary-color);
+}
+
+.nav-wrapper .brand-logo {
+    font-size: 1.8rem;
+    color: var(--text-color);
+}
+
+.nav-wrapper ul li a {
+    color: var(--text-color);
+}
+
+.nav-wrapper ul li a:hover {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+}
+
+/* Estilo para los encabezados */
+h1, h2, h3 {
+    color: var(--primary-color);
+}
+
+h2 {
+    border-bottom: 2px solid var(--secondary-color);
+    padding-bottom: 10px;
+}
+
+/* Estilo para los botones */
+button, .btn {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+button:hover, .btn:hover {
+    background-color: var(--primary-color);
+}
+
+/* Estilo para las tablas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    border: 1px solid var(--primary-color);
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
+
+tr:nth-child(even) {
+    background-color: var(--background-color);
+}
