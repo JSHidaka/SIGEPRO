@@ -159,12 +159,14 @@ def crear_reporte():
             if image:
                 image.save(os.path.join(reporte_path, f'{i}.jpg'))
 
-        return redirect(url_for('index'))
-    
+        # Quedarse en la misma página después de crear el reporte
+        return redirect(url_for('crear_reporte'))
+
     conn = get_db_connection()
     proyectos = conn.execute('SELECT * FROM Proyectos').fetchall()
     conn.close()
     return render_template('crear_reporte.html', proyectos=proyectos)
+
 
 @app.route('/cubicaciones')
 def cubicaciones():
