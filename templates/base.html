@@ -6,6 +6,19 @@
     <title>{% block title %}SIGEPRO{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='materialize.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        @media (max-width: 600px) {
+            .input-field select {
+                display: inline-block;
+            }
+            .select-wrapper input.select-dropdown {
+                display: none;
+            }
+            .select-wrapper ul.dropdown-content {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
     <nav>

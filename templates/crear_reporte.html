@@ -7,33 +7,30 @@
     <h1>Crear Reporte</h1>
     <form action="{{ url_for('crear_reporte') }}" method="post" enctype="multipart/form-data">
         <div class="input-field">
+            <label for="contrato">Seleccione un Proyecto:</label>
             <select name="contrato" id="contrato" onchange="loadTalleres()">
                 <option value="" disabled selected>Seleccione un proyecto</option>
                 {% for proyecto in proyectos %}
                     <option value="{{ proyecto['Contrato'] }}">{{ proyecto['Oferente'] }} - {{ proyecto['Contrato'] }}</option>
                 {% endfor %}
             </select>
-            <label for="contrato">Seleccione un Proyecto:</label>
         </div>
-
         <div class="input-field">
-            <select name="id_taller" id="taller">
+            <label for="id_taller">Seleccione un Taller:</label>
+            <select name="id_taller" id="id_taller">
                 <option value="" disabled selected>Seleccione un taller</option>
             </select>
-            <label for="taller">Seleccione un Taller:</label>
         </div>
-
         <div class="input-field">
-            <input type="date" name="fecha_reporte" id="fecha_reporte" required>
             <label for="fecha_reporte">Fecha del Reporte:</label>
+            <input type="date" name="fecha_reporte" id="fecha_reporte" required>
         </div>
-
         <div class="input-field">
-            <textarea name="descripcion" id="descripcion" class="materialize-textarea" required></textarea>
             <label for="descripcion">Descripción:</label>
+            <textarea name="descripcion" id="descripcion" class="materialize-textarea" required></textarea>
         </div>
-
         <div class="input-field">
+            <label for="estatus">Estatus:</label>
             <select name="estatus" id="estatus" required>
                 <option value="" disabled selected>Seleccione el estatus</option>
                 <option value="No Iniciada">No Iniciada</option>
@@ -43,55 +40,50 @@
                 <option value="Notificado">Notificado</option>
                 <option value="Terminado">Terminado</option>
             </select>
-            <label for="estatus">Estatus:</label>
         </div>
-
         <div class="input-field">
-            <input type="number" name="porciento_eje" id="porciento_eje" required>
             <label for="porciento_eje">Porciento de Ejecución:</label>
+            <input type="number" name="porciento_eje" id="porciento_eje" required>
         </div>
-
         <div>
-            <label for="imagen_1">Imagen 1:</label>
+            <label for="imagen_1">Adjuntar Imagen 1:</label>
             <input type="file" name="imagen_1" id="imagen_1" required><br>
-            <label for="imagen_2">Imagen 2:</label>
+            <label for="imagen_2">Adjuntar Imagen 2:</label>
             <input type="file" name="imagen_2" id="imagen_2" required><br>
-            <label for="imagen_3">Imagen 3:</label>
+            <label for="imagen_3">Adjuntar Imagen 3:</label>
             <input type="file" name="imagen_3" id="imagen_3" required><br>
-            <label for="imagen_4">Imagen 4:</label>
+            <label for="imagen_4">Adjuntar Imagen 4:</label>
             <input type="file" name="imagen_4" id="imagen_4" required><br>
         </div>
-
         <button type="submit" class="btn">Crear Reporte</button>
     </form>
 </div>
 
-<script src="{{ url_for('static', filename='materialize.min.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var selectElems = document.querySelectorAll('select');
-        var instances = M.FormSelect.init(selectElems);
+        var elems = document.querySelectorAll('select');
+        var instances = M.FormSelect.init(elems);
     });
 
     function loadTalleres() {
         const contrato = document.getElementById('contrato').value;
         if (!contrato) {
-            document.getElementById('taller').innerHTML = '<option value="" disabled selected>Seleccione un taller</option>';
+            document.getElementById('id_taller').innerHTML = '<option value="" disabled selected>Seleccione un taller</option>';
             return;
         }
 
         fetch(`/talleres_por_contrato/${contrato}`)
             .then(response => response.json())
             .then(data => {
-                const tallerSelect = document.getElementById('taller');
-                tallerSelect.innerHTML = '<option value="" disabled selected>Seleccione un taller</option>';
+                const talleresSelect = document.getElementById('id_taller');
+                talleresSelect.innerHTML = '<option value="" disabled selected>Seleccione un taller</option>';
                 data.forEach(taller => {
                     const option = document.createElement('option');
                     option.value = taller.ID_Talleres;
-                    option.textContent = `${taller.Lote} - ${taller.Item}`;
-                    tallerSelect.appendChild(option);
+                    option.textContent = `Item: ${taller.Item} - Lote: ${taller.Lote}`;
+                    talleresSelect.appendChild(option);
                 });
-                M.FormSelect.init(tallerSelect);
+                M.FormSelect.init(talleresSelect);
             });
     }
 </script>
