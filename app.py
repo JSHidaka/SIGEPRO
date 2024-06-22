@@ -131,6 +131,9 @@ def uploaded_file(filename):
 
 @app.route('/crear_reporte', methods=['GET', 'POST'])
 def crear_reporte():
+    conn = get_db_connection()
+    zonas = conn.execute('SELECT DISTINCT Zonagpro FROM Talleres ORDER BY Zonagpro').fetchall()
+    conn.close()
     if request.method == 'POST':
         contrato = request.form['contrato']
         id_taller = int(request.form['id_taller'])
@@ -161,10 +164,8 @@ def crear_reporte():
 
         return redirect(url_for('crear_reporte'))
     
-    conn = get_db_connection()
-    zonas = conn.execute('SELECT DISTINCT Zonagpro FROM Talleres').fetchall()
-    conn.close()
     return render_template('crear_reporte.html', zonas=zonas)
+
 
 @app.route('/cubicaciones')
 def cubicaciones():
