@@ -6,13 +6,12 @@
 <h1>Subir Documentos</h1>
 <form action="{{ url_for('subir_documentos') }}" method="post" enctype="multipart/form-data">
     <div class="input-field">
-        <select name="contrato" id="contrato" onchange="loadDocumentos()">
+        <select name="contrato" id="contrato" onchange="loadDocumentos()" class="browser-default">
             <option value="" disabled selected>Seleccione un proyecto</option>
             {% for proyecto in proyectos %}
                 <option value="{{ proyecto['Contrato'] }}">{{ proyecto['Oferente'] }} - {{ proyecto['Contrato'] }}</option>
             {% endfor %}
         </select>
-        <label>Seleccione un Proyecto:</label>
     </div>
     <hr>
     <div id="documentos">

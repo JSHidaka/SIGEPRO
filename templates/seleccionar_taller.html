@@ -6,13 +6,12 @@
 <div class="container">
     <h1>Seleccionar Taller</h1>
     <div class="input-field">
-        <select id="project-select" onchange="loadTalleres()">
+        <select id="project-select" onchange="loadTalleres()" class="browser-default">
             <option value="" disabled selected>Seleccione un proyecto</option>
             {% for proyecto in proyectos %}
                 <option value="{{ proyecto['ID_Proyecto'] }}">{{ proyecto['Oferente'] }} - {{ proyecto['Contrato'] }}</option>
             {% endfor %}
         </select>
-        <label>Seleccione un Proyecto:</label>
     </div>
     <hr>
     <div id="talleres">
@@ -21,11 +20,6 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var elems = document.querySelectorAll('select');
-        M.FormSelect.init(elems);
-    });
-
     function loadTalleres() {
         const projectId = document.getElementById('project-select').value;
         if (!projectId) {

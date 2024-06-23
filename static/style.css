@@ -88,3 +88,20 @@ th {
 tr:nth-child(even) {
     background-color: var(--background-color);
 }
+
+@media only screen and (max-width: 600px) {
+    .custom-select {
+        display: none;
+    }
+    .browser-default {
+        display: block;
+    }
+}
+@media only screen and (min-width: 601px) {
+    .browser-default {
+        display: none;
+    }
+    .custom-select {
+        display: block;
+    }
+}

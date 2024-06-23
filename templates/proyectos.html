@@ -33,7 +33,7 @@
 <div class="container">
     <h1>Seleccione un Proyecto</h1>
     <div class="input-field">
-        <select id="project-select" onchange="onProjectChange()">
+        <select id="project-select" onchange="onProjectChange()" class="browser-default">
             <option value="" disabled selected>Seleccione un proyecto</option>
             {% for proyecto in proyectos %}
                 <option value="{{ proyecto['Contrato'] }}" data-oferente="{{ proyecto['Oferente'] }}">{{ proyecto['Oferente'] }} - {{ proyecto['Contrato'] }}</option>
@@ -72,13 +72,7 @@
     </div>
 </div>
 
-<script src="{{ url_for('static', filename='materialize.min.js') }}"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var elems = document.querySelectorAll('select');
-        var instances = M.FormSelect.init(elems);
-    });
-
     function showLightbox(src) {
         var lightbox = document.getElementById('lightbox');
         var lightboxImg = document.getElementById('lightbox-img');
@@ -240,4 +234,3 @@
     }
 </script>
 {% endblock %}
-
